@@ -166,6 +166,37 @@ def delete_product(id):
                            "CODE": 500})
 
 
+# LIST ALL PRODUCTS
+@get("/products")
+def load_products():
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT category, description, price, title, favorite, img_url, id FROM products"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            return json.dumps({"STATUS": "SUCCESS",
+                               "PRODUCTS": result})
+    except:
+        return json.dumps({"STATUS": "ERROR",
+                           "MSG": "Internal error"})
+
+
+# LIST PRODUCTS BY CATEGORY
+@get('/category/<id>/products')
+def list_products_cat(id):
+    try:
+        with connection.cursor() as cursor:
+            sql = ('SELECT category, description, price, title, favorite, img_url, id FROM products '
+                   'WHERE category = {} ORDER BY favorite DESC, creation_date ASC'.format(id))
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            return json.dumps({"STATUS": "SUCCESS",
+                               "PRODUCTS": result})
+    except:
+        return json.dumps({"STATUS": "ERROR",
+                           "MSG": "Internal error"})
+
+
 # STATIC ROUTES
 @get("/admin")
 def admin_portal():
