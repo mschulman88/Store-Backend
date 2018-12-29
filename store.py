@@ -112,7 +112,7 @@ def add_product():
                 cursor.execute(sql, data)
                 connection.commit()
                 return json.dumps({"STATUS": "SUCCESS",
-                                   "MSG": "The product was added/updated successfully",
+                                   "MSG": "The Product Was Added/Updated Successfully",
                                    "CODE": 201})
         except:
             return json.dumps({"STATUS": "ERROR",
@@ -129,6 +129,41 @@ def add_product():
             return json.dumps({"STATUS": "ERROR",
                                "MSG": "Missing Parameters",
                                "CODE": 400})
+
+
+# GET A PRODUCT
+@get("/product/<id>")
+def load_products(id):
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT category, description, price, title, favorite, img_url, id FROM products"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            return json.dumps({"STATUS": "SUCCESS",
+                               "PRODUCTS": result,
+                               "MSG": "Product Fetched Successfully",
+                               "CODE": 200})
+    except:
+        return json.dumps({"STATUS": 'ERROR',
+                           "MSG": "Internal error",
+                           "CODE": 500})
+
+
+# DELETE A PRODUCT
+@route('/product/<id>', method='DELETE')
+def delete_product(id):
+    try:
+        with connection.cursor() as cursor:
+            sql = ('DELETE FROM products WHERE id = {}'.format(id))
+            cursor.execute(sql)
+            connection.commit()
+            return json.dumps({"STATUS": "SUCCESS",
+                               "MSG": "Product Deleted Successfully",
+                               "CODE": 201})
+    except:
+        return json.dumps({"STATUS": 'ERROR',
+                           "MSG": "Internal error",
+                           "CODE": 500})
 
 
 # STATIC ROUTES
