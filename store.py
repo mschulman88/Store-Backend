@@ -45,7 +45,6 @@ def create_category(name):
                                    "MSG": "Category Created Successfully",
                                    "CAT_ID": id_new_category,
                                    "CODE": 201})
-
         except:
             return json.dumps({"STATUS": "ERROR",
                                "MSG": "Internal error",
@@ -64,11 +63,72 @@ def delete_category(id):
             return json.dumps({"STATUS": "SUCCESS",
                                "MSG": "Category Deleted Succesfully",
                                "CODE": 201})
-
     except:
         return json.dumps({'STATUS': 'ERROR',
                            'MSG': "Internal error",
                            "CODE": 500})
+
+
+# LIST CATEGORIES
+@get("/categories")
+def list_categories():
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM category"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            return json.dumps({"STATUS": "SUCCESS",
+                               "CATEGORIES": result,
+                               "CODE": 200})
+    except:
+        return json.dumps({"STATUS": "ERROR",
+                           "MSG": "Internal error",
+                           "CODE": 500})
+
+
+# ADD/EDIT A PRODUCT
+@post("/product")
+def add_product():
+
+    id_category = request.POST.get('id')
+    category = request.POST.get('category')
+    title = request.POST.get('title')
+    description = request.POST.get('desc')
+    price = request.POST.get('price')
+    favorite = request.POST.get('favorite')
+    img_url = request.POST.get('img_url')
+
+    if favorite == None:
+        favorite_value = 0
+    else:
+        favorite_value = 1
+
+    if id_category != "":
+        try:
+            with connection.cursor() as cursor:
+                sql = ('UPDATE products SET category=%s, title=%s, description=%s, price=%s, favorite=%s, img_url=%s '
+                       'WHERE id=%s')
+                data = (category, str(title), str(description), price, favorite_value, str(img_url), id_category)
+                cursor.execute(sql, data)
+                connection.commit()
+                return json.dumps({"STATUS": "SUCCESS",
+                                   "MSG": "The product was added/updated successfully",
+                                   "CODE": 201})
+        except:
+            return json.dumps({"STATUS": "ERROR",
+                               "MSG": "Internal Error",
+                               "CODE": 500})
+    else:
+        try:
+            with connection.cursor() as cursor:
+                sql = 'INSERT INTO products VALUES(id, %s, %s, %s, %s, %s, %s, now())'
+                data = (category, title, description, price, favorite_value, img_url)
+                cursor.execute(sql, data)
+                connection.commit()
+        except:
+            return json.dumps({"STATUS": "ERROR",
+                               "MSG": "Missing Parameters",
+                               "CODE": 400})
 
 
 # STATIC ROUTES
